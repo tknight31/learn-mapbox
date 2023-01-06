@@ -1,11 +1,78 @@
-import Head from 'next/head'
-import Image from 'next/image'
-import { Inter } from '@next/font/google'
-import styles from '../styles/Home.module.css'
+import { useState, useCallback } from "react";
+import Head from "next/head";
+import Map, {
+  AttributionControl,
+  FullscreenControl,
+  GeolocateControl,
+  Layer,
+  Source,
+  Marker,
+} from "react-map-gl";
+import * as turf from "@turf/turf";
+import * as parkData from "../src/data/sb-parks.json";
+import * as subwayData from "../src/data/subway.json";
+import { Controls } from "../components/Controls";
+import { Button } from "@chakra-ui/react";
 
-const inter = Inter({ subsets: ['latin'] })
+const MAPBOX_TOKEN =
+  "pk.eyJ1IjoidGtuaWdodDMxIiwiYSI6ImNsY2o4MmV4NDQ5aWIzcW1vNzdleHg2dXMifQ.Bb6nK9SLunI75I81QECNig";
+
+// A circle of 5 mile radius of the Empire State Building
+// const GEOFENCE = turf.circle([-74.0122106, 40.7467898], 5, { units: "miles" });
+
+// const geojson = {
+//   type: "Feature",
+//   Geometry: {
+//     type: "Polygon",
+//     coordinates: [
+//       [
+//         [-67.13734351262877, 45.137451890638886],
+//         [-66.96466, 44.8097],
+//         [-68.03252, 44.3252],
+//         [-69.06, 43.98],
+//         [-70.11617, 43.68405],
+//         [-70.64573401557249, 43.090083319667144],
+//         [-70.75102474636725, 43.08003225358635],
+//         [-70.79761105007827, 43.21973948828747],
+//         [-70.98176001655037, 43.36789581966826],
+//         [-70.94416541205806, 43.46633942318431],
+//         [-71.08482, 45.3052400000002],
+//         [-70.6600225491012, 45.46022288673396],
+//         [-70.30495378282376, 45.914794623389355],
+//         [-70.00014034695016, 46.69317088478567],
+//         [-69.23708614772835, 47.44777598732787],
+//         [-68.90478084987546, 47.184794623394396],
+//         [-68.23430497910454, 47.35462921812177],
+//         [-67.79035274928509, 47.066248887716995],
+//         [-67.79141211614706, 45.702585354182816],
+//         [-67.13734351262877, 45.137451890638886],
+//       ],
+//     ],
+//   },
+// };
+
+const layers = [
+  {
+    id: "point",
+    type: "circle",
+    paint: {
+      "circle-radius": 10,
+      "circle-color": "#007cbf",
+    },
+  },
+];
 
 export default function Home() {
+  const [viewState, setViewState] = useState({
+    longitude: -74.0122106,
+    latitude: 40.7467898,
+    zoom: 11,
+    bearing: 24,
+  });
+
+  const [isSubways, setSubways] = useState(true);
+  const [isParks, setParks] = useState(true);
+
   return (
     <>
       <Head>
@@ -14,110 +81,49 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className={styles.main}>
-        <div className={styles.description}>
-          <p>
-            Get started by editing&nbsp;
-            <code className={styles.code}>pages/index.tsx</code>
-          </p>
-          <div>
-            <a
-              href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              By{' '}
-              <Image
-                src="/vercel.svg"
-                alt="Vercel Logo"
-                className={styles.vercelLogo}
-                width={100}
-                height={24}
-                priority
-              />
-            </a>
-          </div>
-        </div>
+      <Map
+        {...viewState}
+        style={{ width: "100%", height: "100vh" }}
+        onMove={(e) => setViewState(e.viewState)}
+        mapStyle="mapbox://styles/tknight31/clcjiq8c1003v15t7fseghgtk"
+        mapboxAccessToken={MAPBOX_TOKEN}
+        pitch={60}
+        attributionControl={false}
+      >
+        <AttributionControl customAttribution="I MADE THIS" />
 
-        <div className={styles.center}>
-          <Image
-            className={styles.logo}
-            src="/next.svg"
-            alt="Next.js Logo"
-            width={180}
-            height={37}
-            priority
-          />
-          <div className={styles.thirteen}>
-            <Image
-              src="/thirteen.svg"
-              alt="13"
-              width={40}
-              height={31}
-              priority
-            />
-          </div>
-        </div>
+        <Controls
+          isSubways={isSubways}
+          setSubways={setSubways}
+          isParks={isParks}
+          setParks={setParks}
+        />
 
-        <div className={styles.grid}>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Docs <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Find in-depth information about Next.js features and&nbsp;API.
-            </p>
-          </a>
-
-          <a
-            href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Learn <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Learn about Next.js in an interactive course with&nbsp;quizzes!
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Templates <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Discover and deploy boilerplate example Next.js&nbsp;projects.
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Deploy <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Instantly deploy your Next.js site to a shareable URL
-              with&nbsp;Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
+        {isParks &&
+          parkData.features.map((park) => {
+            return (
+              <Marker
+                key={park.properties.PARK_ID}
+                longitude={park.geometry.coordinates[0]}
+                latitude={park.geometry.coordinates[1]}
+              >
+                <div style={{ fontSize: "45px" }}>🛹</div>
+              </Marker>
+            );
+          })}
+        {isSubways &&
+          subwayData.features.map((station) => {
+            return (
+              <Marker
+                key={station.properties.objectid}
+                longitude={station.geometry.coordinates[0]}
+                latitude={station.geometry.coordinates[1]}
+              >
+                <div style={{ fontSize: "14px" }}>🚆</div>
+              </Marker>
+            );
+          })}
+      </Map>
     </>
-  )
+  );
 }
