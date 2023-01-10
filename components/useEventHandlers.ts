@@ -24,9 +24,29 @@ const useEventHandlers = () => {
   };
 
   const onClick = (e: mapboxgl.MapLayerMouseEvent) => {
-    console.log(e.features?.[0].id, "Click EVENT");
-    const layerId = String(e.features?.[0]?.layer.id);
-    setSelectedFeatureID(e.features?.[0].id);
+    if (e.features && e.features?.length > 0) {
+      if (selectedFeatureID !== null) {
+        map?.setFeatureState(
+          {
+            source: "borough-data",
+            sourceLayer: "Borough_Boundaries_Tiles",
+            id: selectedFeatureID,
+          },
+          { selected: false }
+        );
+      }
+      setSelectedFeatureID(e.features[0].id);
+      map?.setFeatureState(
+        {
+          source: "borough-data",
+          sourceLayer: "Borough_Boundaries_Tiles",
+          id: selectedFeatureID,
+        },
+        { selected: true }
+      );
+    }
+    // const layerId = String(e.features?.[0]?.layer.id);
+    // setSelectedFeatureID(e.features?.[0].id);
   };
 
   return { onMouseEnter, onMouseLeave, onClick };

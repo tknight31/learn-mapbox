@@ -5,6 +5,7 @@ import { Controls } from "../components/Controls";
 import { useAtom } from "jotai";
 import { selectedFeatureIDAtom } from "../lib/store";
 // import * as turf from "@turf/turf";
+import { mapAtom } from "../lib/store";
 import * as parkData from "../src/data/sb-parks.json";
 import * as subwayData from "../src/data/subway.json";
 import Map from "../components/Map";
@@ -20,7 +21,7 @@ export default function Home() {
   const [isParks, setParks] = useState(true);
   const [selectedFeatureID] = useAtom(selectedFeatureIDAtom);
   console.log(
-    "🚀 ~ file: index.tsx:23 ~ Home ~ selectedFeatureID",
+    "🚀 ~ file: index.tsx:23 ~ Home ~ selectedFeatureId",
     selectedFeatureID
   );
 
@@ -55,13 +56,18 @@ export default function Home() {
             {...boroughLayer}
             paint={{
               "fill-color": "#4E3FC8",
-              "fill-opacity": 0.5,
-              "fill-outline-color": [
+              "fill-opacity": [
                 "case",
-                ["==", ["get", "id"], selectedFeatureID],
-                "blue",
-                "red",
+                ["boolean", ["feature-state", "selected"], false],
+                1,
+                0.5,
               ],
+              // "fill-outline-color": [
+              //   "case",
+              //   ["==", ["get", "id"], selectedFeatureID],
+              //   "blue",
+              //   "red",
+              // ],
             }}
           />
         </Source>
