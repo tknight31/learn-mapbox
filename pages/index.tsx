@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import Head from "next/head";
-import Mapbox, { Layer, Source, Marker, FillLayer } from "react-map-gl";
+import { Layer, Source, Marker, FillLayer } from "react-map-gl";
 import { Controls } from "../components/Controls";
+import { useAtom } from "jotai";
+import { selectedFeatureIDAtom } from "../lib/store";
 // import * as turf from "@turf/turf";
 import * as parkData from "../src/data/sb-parks.json";
 import * as subwayData from "../src/data/subway.json";
@@ -11,15 +13,16 @@ const boroughLayer: FillLayer = {
   id: "boroughs",
   type: "fill",
   "source-layer": "Borough_Boundaries_Tiles",
-  paint: {
-    "fill-color": "#4E3FC8",
-    "fill-opacity": 0.5,
-  },
 };
 
 export default function Home() {
   const [isSubways, setSubways] = useState(true);
   const [isParks, setParks] = useState(true);
+  const [selectedFeatureID] = useAtom(selectedFeatureIDAtom);
+  console.log(
+    "🚀 ~ file: index.tsx:23 ~ Home ~ selectedFeatureID",
+    selectedFeatureID
+  );
 
   return (
     <>
@@ -48,7 +51,19 @@ export default function Home() {
           type="vector"
           url={`https://api.mapbox.com/v4/tknight31.clckukyla0bpp2eqgaeo5ytc8-5xghl.json?access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}`}
         >
-          <Layer {...boroughLayer} />
+          <Layer
+            {...boroughLayer}
+            paint={{
+              "fill-color": "#4E3FC8",
+              "fill-opacity": 0.5,
+              "fill-outline-color": [
+                "case",
+                ["==", ["get", "id"], selectedFeatureID],
+                "blue",
+                "red",
+              ],
+            }}
+          />
         </Source>
 
         {isParks &&
