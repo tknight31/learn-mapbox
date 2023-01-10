@@ -1,7 +1,26 @@
+import React, { useState } from "react";
 import Head from "next/head";
+import Mapbox, { Layer, Source, Marker, FillLayer } from "react-map-gl";
+import { Controls } from "../components/Controls";
+// import * as turf from "@turf/turf";
+import * as parkData from "../src/data/sb-parks.json";
+import * as subwayData from "../src/data/subway.json";
 import Map from "../components/Map";
 
+const boroughLayer: FillLayer = {
+  id: "boroughs",
+  type: "fill",
+  "source-layer": "Borough_Boundaries_Tiles",
+  paint: {
+    "fill-color": "#4E3FC8",
+    "fill-opacity": 0.5,
+  },
+};
+
 export default function Home() {
+  const [isSubways, setSubways] = useState(true);
+  const [isParks, setParks] = useState(true);
+
   return (
     <>
       <Head>
@@ -10,7 +29,53 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Map />
+      <Map
+        initialViewState={{
+          longitude: -74.0122106,
+          latitude: 40.7467898,
+          zoom: 11,
+          bearing: 24,
+        }}
+      >
+        <Controls
+          isSubways={isSubways}
+          setSubways={setSubways}
+          isParks={isParks}
+          setParks={setParks}
+        />
+        <Source
+          id="borough-data"
+          type="vector"
+          url={`https://api.mapbox.com/v4/tknight31.clckukyla0bpp2eqgaeo5ytc8-5xghl.json?access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}`}
+        >
+          <Layer {...boroughLayer} />
+        </Source>
+
+        {isParks &&
+          parkData.features.map((park) => {
+            return (
+              <Marker
+                key={park.properties.PARK_ID}
+                longitude={park.geometry.coordinates[0]}
+                latitude={park.geometry.coordinates[1]}
+              >
+                <div style={{ fontSize: "45px" }}>🛹</div>
+              </Marker>
+            );
+          })}
+        {isSubways &&
+          subwayData.features.map((station) => {
+            return (
+              <Marker
+                key={station.properties.objectid}
+                longitude={station.geometry.coordinates[0]}
+                latitude={station.geometry.coordinates[1]}
+              >
+                <div style={{ fontSize: "14px" }}>🚆</div>
+              </Marker>
+            );
+          })}
+      </Map>
     </>
   );
 }
