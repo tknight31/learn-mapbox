@@ -4,8 +4,6 @@ import { Layer, Source, Marker, FillLayer } from "react-map-gl";
 import { Controls } from "../components/Controls";
 import { useAtom } from "jotai";
 import { selectedFeatureIDAtom } from "../lib/store";
-// import * as turf from "@turf/turf";
-import { mapAtom } from "../lib/store";
 import * as parkData from "../src/data/sb-parks.json";
 import * as subwayData from "../src/data/subway.json";
 import Map from "../components/Map";

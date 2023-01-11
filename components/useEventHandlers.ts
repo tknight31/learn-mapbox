@@ -10,21 +10,19 @@ const useEventHandlers = () => {
 
   const onMouseEnter = (e: mapboxgl.MapLayerMouseEvent) => {
     const currLayer = e.features?.[0].layer;
-    // console.log(currLayer?.paint?["fill-opacity"], "CURR LAYER");
-    // currLayer?.paint?.["fill-opacity"]
-    const layerId = String(e.features?.[0].layer.id);
-
-    // console.log(`enter - ${layerId}`);
+    console.log(e.features?.[0], "feature object");
+    console.log(`mouse entering ${e.features?.[0].id}`, currLayer);
   };
 
   const onMouseLeave = (e: mapboxgl.MapLayerMouseEvent) => {
-    const layerId = String(e.features?.[0].layer.id);
-
-    // console.log(`leave - ${layerId}`);
+    const currLayer = e.features?.[0].layer;
+    console.log(`mouse leaving ${e.features?.[0].id}`, currLayer);
   };
 
   const onClick = (e: mapboxgl.MapLayerMouseEvent) => {
+    // if features exist
     if (e.features && e.features?.length > 0) {
+      // if the feature is already selected, deselect it
       if (selectedFeatureID !== null) {
         map?.setFeatureState(
           {
@@ -40,13 +38,11 @@ const useEventHandlers = () => {
         {
           source: "borough-data",
           sourceLayer: "Borough_Boundaries_Tiles",
-          id: selectedFeatureID,
+          id: e.features?.[0].id,
         },
         { selected: true }
       );
     }
-    // const layerId = String(e.features?.[0]?.layer.id);
-    // setSelectedFeatureID(e.features?.[0].id);
   };
 
   return { onMouseEnter, onMouseLeave, onClick };

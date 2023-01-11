@@ -3,4 +3,4 @@ import { MapRef } from "react-map-gl";
 
 export const mapAtom = atom<MapRef | null>(null);
 
-export const selectedFeatureIDAtom = atom<any>("");
+export const selectedFeatureIDAtom = atom<any>(null);
